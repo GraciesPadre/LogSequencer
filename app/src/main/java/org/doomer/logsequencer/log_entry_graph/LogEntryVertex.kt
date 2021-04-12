@@ -1,4 +1,4 @@
-package org.doomer.logsequencer.connection_graph
+package org.doomer.logsequencer.log_entry_graph
 
 class LogEntryVertex(val logEntryUrl: String) {
     private val logEntryEdges = mutableMapOf<String, LogEntryEdge>()
@@ -11,6 +11,11 @@ class LogEntryVertex(val logEntryUrl: String) {
             logEntryEdges[logEntryVertex.logEntryUrl] = LogEntryEdge(logEntryVertex, existingEdge.count + 1)
         }
 
+        return this
+    }
+
+    fun removeEdge(logEntryEdge: LogEntryEdge): LogEntryVertex {
+        logEntryEdges.remove(logEntryEdge.logEntryVertex.logEntryUrl)
         return this
     }
 

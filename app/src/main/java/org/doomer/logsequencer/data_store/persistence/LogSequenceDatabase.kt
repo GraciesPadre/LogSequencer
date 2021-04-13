@@ -23,7 +23,30 @@ class LogSequenceDatabase(private val db: SQLiteDatabase, private val dateFormat
     }
 
     override fun recordLogVisitedEvents(logSequenceEntries: List<LogSequenceEntry>) {
-        TODO("Not yet implemented")
+        val sql = "INSERT INTO $TABLE_NAME ($LOG_SEQUENCE_VISITING_URL, $LOG_SEQUENCE_VISITED_URL) VALUES(?, ?)"
+        val compiledSql = db.compileStatement(sql)
+
+        db.beginTransaction()
+
+        try {
+            compiledSql.clearBindings()
+
+            for (logSequenceEntry in logSequenceEntries) {
+                compiledSql.bindString(ColumnIndexes.LOG_SEQUENCE_VISITING_URL_COLUMN_INDEX, logSequenceEntry.visitingUrl)
+                compiledSql.bindString(ColumnIndexes.LOG_SEQUENCE_VISITED_URL_COLUMN_INDEX, logSequenceEntry.visitedUrl)
+
+                compiledSql.execute()
+            }
+
+            db.setTransactionSuccessful()
+        } finally {
+            db.endTransaction()
+        }
+    }
+
+    private object ColumnIndexes {
+        const val LOG_SEQUENCE_VISITING_URL_COLUMN_INDEX = 1
+        const val LOG_SEQUENCE_VISITED_URL_COLUMN_INDEX = 2
     }
 
     override fun getAllLogVisitedEvents(): List<LogSequenceEntry> {

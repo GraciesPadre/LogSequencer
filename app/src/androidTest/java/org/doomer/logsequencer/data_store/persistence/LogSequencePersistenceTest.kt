@@ -69,4 +69,21 @@ class LogSequencePersistenceTest {
         Assert.assertEquals(two, LogSequenceEntry(result[1].visitingUrl, result[1].visitedUrl))
         Assert.assertEquals(three, LogSequenceEntry(result[2].visitingUrl, result[2].visitedUrl))
     }
+
+    @Test
+    fun testGettingVisitingUrls() {
+        val one = LogSequenceEntry("a", "1")
+        val two = LogSequenceEntry("b", "2")
+
+        for (i in 1..10) {
+            Assert.assertTrue(db.recordLogVisitedEvent(one) > -1)
+            Assert.assertTrue(db.recordLogVisitedEvent(two) > -1)
+        }
+
+        val allEntries = db.getAllLogVisitedEvents()
+        Assert.assertEquals(20, allEntries.size)
+
+        val visitingUrls = db.getUniqueVisitingUrls()
+        Assert.assertEquals(2, visitingUrls.size)
+    }
 }

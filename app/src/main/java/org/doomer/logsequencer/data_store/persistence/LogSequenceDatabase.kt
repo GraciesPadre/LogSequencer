@@ -77,7 +77,22 @@ class LogSequenceDatabase(private val db: SQLiteDatabase, private val dateFormat
     }
 
     override fun getUniqueVisitingUrls(): List<String> {
-        TODO("Not yet implemented")
+        val result = mutableListOf<String>()
+
+        val columnIndex = 0
+
+        val cursor = db.query(true, TABLE_NAME, arrayOf(LOG_SEQUENCE_VISITING_URL), null, null, null, null, LOG_ENTRY_ID, null)
+
+        cursor.use { dbCursor ->
+            dbCursor.moveToFirst()
+
+            while (!dbCursor.isAfterLast) {
+                result.add(dbCursor.getString(columnIndex))
+                dbCursor.moveToNext()
+            }
+        }
+
+        return result
     }
 
     override fun clear() {

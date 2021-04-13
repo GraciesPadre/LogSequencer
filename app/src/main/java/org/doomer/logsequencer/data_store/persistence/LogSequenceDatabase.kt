@@ -7,11 +7,9 @@ import org.doomer.logsequencer.data_store.persistence.LogSequenceDatabaseSchema.
 import org.doomer.logsequencer.data_store.persistence.LogSequenceDatabaseSchema.LogSequenceDatabaseSchema.LOG_SEQUENCE_VISITING_URL
 import org.doomer.logsequencer.data_store.persistence.LogSequenceDatabaseSchema.LogSequenceDatabaseSchema.LOG_SEQUENCE_VISITED_URL
 import org.doomer.logsequencer.data_store.persistence.LogSequenceDatabaseSchema.LogSequenceDatabaseSchema.TABLE_NAME
-import java.text.DateFormat
-import java.text.DateFormat.getDateInstance
 
-class LogSequenceDatabase(private val db: SQLiteDatabase, private val dateFormatter: DateFormat): LogSequencePersistence {
-    constructor(context: Context): this(LogSequenceDatabaseHelper(context).writableDatabase, getDateInstance())
+class LogSequenceDatabase(private val db: SQLiteDatabase): LogSequencePersistence {
+    constructor(context: Context): this(LogSequenceDatabaseHelper(context).writableDatabase)
 
     override fun recordLogVisitedEvent(logSequenceEntry: LogSequenceEntry): Long {
         val dbTableEntry = contentValuesOf(
@@ -88,6 +86,25 @@ class LogSequenceDatabase(private val db: SQLiteDatabase, private val dateFormat
 
             while (!dbCursor.isAfterLast) {
                 result.add(dbCursor.getString(columnIndex))
+                dbCursor.moveToNext()
+            }
+        }
+
+        return result
+    }
+
+    override fun getLogVisitedEventsForVisitingUrl(visitingUrl: String): List<LogSequenceEntry> {
+        val result = mutableListOf<LogSequenceEntry>()
+
+        val cursor = LogSequenceEntryWrapper(
+            db.query(TABLE_NAME, null, "$LOG_SEQUENCE_VISITING_URL = ?", arrayOf(visitingUrl), null, null, LOG_ENTRY_ID)
+        )
+
+        cursor.use { dbCursor ->
+            dbCursor.moveToFirst()
+
+            while (!dbCursor.isAfterLast) {
+                result.add(dbCursor.getLogSequenceEntry())
                 dbCursor.moveToNext()
             }
         }

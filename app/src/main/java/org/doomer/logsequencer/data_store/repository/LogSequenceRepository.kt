@@ -1,9 +1,10 @@
-package org.doomer.logsequencer.data_store.persistence
+package org.doomer.logsequencer.data_store.repository
 
-interface LogSequencePersistence {
-    fun recordLogVisitedEvent(logSequenceEntry: LogSequenceEntry): Long
+import org.doomer.logsequencer.data_store.persistence.LogSequenceEntry
+
+interface LogSequenceRepository {
+    fun recordLogVisitedEvent(logSequenceEntry: LogSequenceEntry): Boolean
     fun recordLogVisitedEvents(logSequenceEntries: List<LogSequenceEntry>)
-    fun getAllLogVisitedEvents(): List<LogSequenceEntry>
     fun getUniqueVisitingUrls(): List<String>
     fun getLogVisitedEventsForVisitingUrl(visitingUrl: String): List<LogSequenceEntry>
     fun clear()

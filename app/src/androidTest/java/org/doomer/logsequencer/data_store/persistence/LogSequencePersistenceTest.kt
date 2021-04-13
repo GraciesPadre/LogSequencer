@@ -7,10 +7,11 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import java.lang.IllegalStateException
 
 @RunWith(AndroidJUnit4::class)
 class LogSequencePersistenceTest {
-    lateinit var db: LogSequenceDatabase
+    private lateinit var db: LogSequenceDatabase
 
     @Before
     fun setup() {
@@ -53,6 +54,27 @@ class LogSequencePersistenceTest {
     }
 
     @Test
+    fun testClose() {
+        Assert.assertTrue(db.recordLogVisitedEvent(LogSequenceEntry("a", "1")) > -1)
+        val result = db.getAllLogVisitedEvents()
+        Assert.assertEquals(1, result.size)
+        Assert.assertEquals("a", result[0].visitingUrl)
+        Assert.assertEquals("1", result[0].visitedUrl)
+
+        db.close()
+
+        var error: IllegalStateException? = null
+
+        try {
+            db.getAllLogVisitedEvents()
+        } catch (e: IllegalStateException) {
+            error = e
+        }
+
+        Assert.assertNotNull(error)
+    }
+
+    @Test
     fun testAdding2Entries() {
         val one = LogSequenceEntry("a", "1")
         val two = LogSequenceEntry("b", "2")
@@ -85,5 +107,21 @@ class LogSequencePersistenceTest {
 
         val visitingUrls = db.getUniqueVisitingUrls()
         Assert.assertEquals(2, visitingUrls.size)
+    }
+
+    @Test
+    fun testGetLogVisitedEventsForVisitingUrl() {
+        for (i in 1..10) {
+            Assert.assertTrue(db.recordLogVisitedEvent(LogSequenceEntry("a", i.toString())) > -1)
+            Assert.assertTrue(db.recordLogVisitedEvent(LogSequenceEntry("b", (i * 10).toString())) > -1 )
+        }
+
+        val entriesForB = db.getLogVisitedEventsForVisitingUrl("b")
+
+        Assert.assertEquals(10, entriesForB.size)
+
+        for (i in entriesForB.indices) {
+            Assert.assertEquals(((i + 1) * 10).toString(), entriesForB[i].visitedUrl)
+        }
     }
 }

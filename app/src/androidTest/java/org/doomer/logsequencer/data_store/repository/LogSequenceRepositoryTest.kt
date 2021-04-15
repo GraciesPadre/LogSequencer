@@ -29,39 +29,39 @@ class LogSequenceRepositoryTest {
     @Test
     fun testPreconditions() {
         Assert.assertNotNull(logSequenceRepository)
-        Assert.assertEquals(0, logSequenceRepository.getUniqueVisitingUrls().size)
+        Assert.assertEquals(0, logSequenceRepository.getUniqueVisitingIpAddresses().size)
     }
 
     @Test
     fun testRecordLogVisitedEvent() {
-        Assert.assertTrue(logSequenceRepository.recordLogVisitedEvent(LogSequenceEntry("a", "1")))
+        Assert.assertTrue(logSequenceRepository.recordLogVisitedUrl(LogSequenceEntry("a", "1")))
 
-        val logEvents = logSequenceRepository.getUniqueVisitingUrls()
+        val logEvents = logSequenceRepository.getUniqueVisitingIpAddresses()
 
         Assert.assertEquals(1, logEvents.size)
         Assert.assertEquals("a", logEvents[0])
 
         for (element in logEvents) {
-            Assert.assertEquals(LogSequenceEntry("a", "1"), logSequenceRepository.getLogVisitedEventsForVisitingUrl(element)[0])
+            Assert.assertEquals(LogSequenceEntry("a", "1"), logSequenceRepository.getLogVisitedUrlsForVisitingIpAddress(element)[0])
         }
     }
 
     @Test
     fun testClear() {
-        Assert.assertTrue(logSequenceRepository.recordLogVisitedEvent(LogSequenceEntry("a", "1")))
+        Assert.assertTrue(logSequenceRepository.recordLogVisitedUrl(LogSequenceEntry("a", "1")))
 
-        val logEvents = logSequenceRepository.getUniqueVisitingUrls()
+        val logEvents = logSequenceRepository.getUniqueVisitingIpAddresses()
 
         Assert.assertEquals(1, logEvents.size)
         Assert.assertEquals("a", logEvents[0])
 
         for (element in logEvents) {
-            Assert.assertEquals(LogSequenceEntry("a", "1"), logSequenceRepository.getLogVisitedEventsForVisitingUrl(element)[0])
+            Assert.assertEquals(LogSequenceEntry("a", "1"), logSequenceRepository.getLogVisitedUrlsForVisitingIpAddress(element)[0])
         }
 
         logSequenceRepository.clear()
 
-        val logEventsAfterClear = logSequenceRepository.getUniqueVisitingUrls()
+        val logEventsAfterClear = logSequenceRepository.getUniqueVisitingIpAddresses()
 
         Assert.assertEquals(0, logEventsAfterClear.size)
     }
@@ -70,15 +70,15 @@ class LogSequenceRepositoryTest {
     fun testClose() {
         val localRepo = LogSequenceRepositoryFactory.getLogSequenceRepository(InstrumentationRegistry.getInstrumentation().targetContext)
 
-        Assert.assertTrue(localRepo.recordLogVisitedEvent(LogSequenceEntry("a", "1")))
+        Assert.assertTrue(localRepo.recordLogVisitedUrl(LogSequenceEntry("a", "1")))
 
-        val logEvents = localRepo.getUniqueVisitingUrls()
+        val logEvents = localRepo.getUniqueVisitingIpAddresses()
 
         Assert.assertEquals(1, logEvents.size)
         Assert.assertEquals("a", logEvents[0])
 
         for (element in logEvents) {
-            Assert.assertEquals(LogSequenceEntry("a", "1"), localRepo.getLogVisitedEventsForVisitingUrl(element)[0])
+            Assert.assertEquals(LogSequenceEntry("a", "1"), localRepo.getLogVisitedUrlsForVisitingIpAddress(element)[0])
         }
 
         localRepo.close()
@@ -86,7 +86,7 @@ class LogSequenceRepositoryTest {
         var error: IllegalStateException? = null
 
         try {
-            localRepo.getUniqueVisitingUrls()
+            localRepo.getUniqueVisitingIpAddresses()
         } catch (e: IllegalStateException) {
             error = e
         }
@@ -107,13 +107,13 @@ class LogSequenceRepositoryTest {
             logSequenceEntries.add(three)
         }
 
-        logSequenceRepository.recordLogVisitedEvents(logSequenceEntries)
+        logSequenceRepository.recordLogVisitedUrls(logSequenceEntries)
 
-        val visitingUrls = logSequenceRepository.getUniqueVisitingUrls()
+        val visitingUrls = logSequenceRepository.getUniqueVisitingIpAddresses()
 
         Assert.assertEquals(3, visitingUrls.size)
 
-        val logEntries = logSequenceRepository.getLogVisitedEventsForVisitingUrl("c")
+        val logEntries = logSequenceRepository.getLogVisitedUrlsForVisitingIpAddress("c")
 
         Assert.assertEquals(10, logEntries.size)
 

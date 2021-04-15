@@ -11,16 +11,16 @@ import org.doomer.logsequencer.data_store.persistence.LogSequenceDatabaseSchema.
 class LogSequenceDatabase(private val db: SQLiteDatabase): LogSequencePersistence {
     constructor(context: Context): this(LogSequenceDatabaseHelper(context).writableDatabase)
 
-    override fun recordLogVisitedEvent(logSequenceEntry: LogSequenceEntry): Long {
+    override fun recordLogVisitedUrl(logSequenceEntry: LogSequenceEntry): Long {
         val dbTableEntry = contentValuesOf(
-            LOG_SEQUENCE_VISITING_URL to logSequenceEntry.visitingUrl,
+            LOG_SEQUENCE_VISITING_URL to logSequenceEntry.ipAddress,
             LOG_SEQUENCE_VISITED_URL to logSequenceEntry.visitedUrl
         )
 
         return db.insert(TABLE_NAME, null, dbTableEntry)
     }
 
-    override fun recordLogVisitedEvents(logSequenceEntries: List<LogSequenceEntry>) {
+    override fun recordLogVisitedUrls(logSequenceEntries: List<LogSequenceEntry>) {
         val sql = "INSERT INTO $TABLE_NAME ($LOG_SEQUENCE_VISITING_URL, $LOG_SEQUENCE_VISITED_URL) VALUES(?, ?)"
         val compiledSql = db.compileStatement(sql)
 
@@ -30,7 +30,7 @@ class LogSequenceDatabase(private val db: SQLiteDatabase): LogSequencePersistenc
             compiledSql.clearBindings()
 
             for (logSequenceEntry in logSequenceEntries) {
-                compiledSql.bindString(ColumnIndexes.LOG_SEQUENCE_VISITING_URL_COLUMN_INDEX, logSequenceEntry.visitingUrl)
+                compiledSql.bindString(ColumnIndexes.LOG_SEQUENCE_VISITING_URL_COLUMN_INDEX, logSequenceEntry.ipAddress)
                 compiledSql.bindString(ColumnIndexes.LOG_SEQUENCE_VISITED_URL_COLUMN_INDEX, logSequenceEntry.visitedUrl)
 
                 compiledSql.execute()
@@ -47,7 +47,7 @@ class LogSequenceDatabase(private val db: SQLiteDatabase): LogSequencePersistenc
         const val LOG_SEQUENCE_VISITED_URL_COLUMN_INDEX = 2
     }
 
-    override fun getAllLogVisitedEvents(): List<LogSequenceEntry> {
+    override fun getAllLogVisitedUrls(): List<LogSequenceEntry> {
         val result = mutableListOf<LogSequenceEntry>()
 
         val cursor = LogSequenceEntryWrapper(
@@ -74,7 +74,7 @@ class LogSequenceDatabase(private val db: SQLiteDatabase): LogSequencePersistenc
         return result
     }
 
-    override fun getUniqueVisitingUrls(): List<String> {
+    override fun getUniqueVisitingIpAddresses(): List<String> {
         val result = mutableListOf<String>()
 
         val columnIndex = 0
@@ -93,11 +93,11 @@ class LogSequenceDatabase(private val db: SQLiteDatabase): LogSequencePersistenc
         return result
     }
 
-    override fun getLogVisitedEventsForVisitingUrl(visitingUrl: String): List<LogSequenceEntry> {
+    override fun getLogVisitedUrlsForVisitingIpAddress(ipAddress: String): List<LogSequenceEntry> {
         val result = mutableListOf<LogSequenceEntry>()
 
         val cursor = LogSequenceEntryWrapper(
-            db.query(TABLE_NAME, null, "$LOG_SEQUENCE_VISITING_URL = ?", arrayOf(visitingUrl), null, null, LOG_ENTRY_ID)
+            db.query(TABLE_NAME, null, "$LOG_SEQUENCE_VISITING_URL = ?", arrayOf(ipAddress), null, null, LOG_ENTRY_ID)
         )
 
         cursor.use { dbCursor ->

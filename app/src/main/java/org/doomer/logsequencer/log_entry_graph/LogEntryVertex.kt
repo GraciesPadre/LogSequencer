@@ -1,21 +1,21 @@
 package org.doomer.logsequencer.log_entry_graph
 
-class LogEntryVertex(val logEntryUrl: String) {
+class LogEntryVertex(val visitedUrl: String) {
     private val logEntryEdges = mutableMapOf<String, LogEntryEdge>()
 
     fun addEdge(logEntryVertex: LogEntryVertex): LogEntryVertex {
-        val existingEdge = logEntryEdges[logEntryVertex.logEntryUrl]
+        val existingEdge = logEntryEdges[logEntryVertex.visitedUrl]
         if (existingEdge == null) {
-            logEntryEdges[logEntryVertex.logEntryUrl] = LogEntryEdge(logEntryVertex, 1)
+            logEntryEdges[logEntryVertex.visitedUrl] = LogEntryEdge(logEntryVertex, 1)
         } else {
-            logEntryEdges[logEntryVertex.logEntryUrl] = LogEntryEdge(logEntryVertex, existingEdge.count + 1)
+            logEntryEdges[logEntryVertex.visitedUrl] = LogEntryEdge(logEntryVertex, existingEdge.count + 1)
         }
 
         return this
     }
 
     fun removeEdge(logEntryEdge: LogEntryEdge): LogEntryVertex {
-        logEntryEdges.remove(logEntryEdge.logEntryVertex.logEntryUrl)
+        logEntryEdges.remove(logEntryEdge.logEntryVertex.visitedUrl)
         return this
     }
 
@@ -31,5 +31,9 @@ class LogEntryVertex(val logEntryUrl: String) {
         }
 
         return result
+    }
+
+    override fun toString(): String {
+        return "LogEntryVertex(visitedUrl='$visitedUrl', logEntryEdges=$logEntryEdges)"
     }
 }
